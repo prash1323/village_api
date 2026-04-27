@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoIndia API — Village-Level Address Data for India</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo">Geo<span>India</span></a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="docs.html">Docs</a></li>
+      <li><a href="admin.html">Admin</a></li>
+      <li><a href="portal.html" class="btn-nav">Client Portal</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger">&#9776;</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge">🇮🇳 6,40,867+ Villages Indexed</div>
+    <h1>India's Complete<br /><span class="gradient-text">Village API</span></h1>
+    <p class="hero-sub">Production-ready REST API for hierarchical Indian address data. State → District → Sub-District → Village. Built for B2B platforms, logistics, and e-commerce.</p>
+    <div class="hero-actions">
+      <a href="portal.html" class="btn-primary">Start Free Trial</a>
+      <a href="docs.html" class="btn-ghost">View API Docs →</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num" data-target="36">0</span><span class="stat-label">States & UTs</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num" data-target="766">0</span><span class="stat-label">Districts</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num" data-target="5971">0</span><span class="stat-label">Sub-Districts</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num" data-target="640867">0</span><span class="stat-label">Villages</span></div>
+    </div>
+  </div>
+  <div class="hero-terminal">
+    <div class="terminal-bar">
+      <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+      <span class="terminal-title">API Response</span>
+    </div>
+    <pre class="terminal-code" id="terminalCode"></pre>
+  </div>
+</section>
+
+<!-- LIVE DEMO SEARCH -->
+<section class="demo-section">
+  <div class="container">
+    <div class="section-label">Live Demo</div>
+    <h2>Try the API Right Now</h2>
+    <p class="section-sub">Search villages, districts, and states in real time. No signup required.</p>
+    <div class="search-box">
+      <div class="search-row">
+        <select id="demoState" class="select-input">
+          <option value="">Select State</option>
+          <option>Maharashtra</option><option>Uttar Pradesh</option>
+          <option>Rajasthan</option><option>Bihar</option>
+          <option>Madhya Pradesh</option><option>Tamil Nadu</option>
+          <option>Karnataka</option><option>Gujarat</option>
+        </select>
+        <select id="demoDistrict" class="select-input">
+          <option value="">Select District</option>
+        </select>
+        <select id="demoSubDistrict" class="select-input">
+          <option value="">Select Sub-District</option>
+        </select>
+        <input type="text" id="demoVillage" class="text-input" placeholder="Search village..." />
+        <button class="btn-primary" id="demoSearch">Search</button>
+      </div>
+    </div>
+    <div class="demo-results" id="demoResults"></div>
+    <div class="demo-api-url" id="demoUrl"></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="container">
+    <div class="section-label">Capabilities</div>
+    <h2>Everything You Need for <br />Address Autocomplete</h2>
+    <div class="features-grid">
+      <div class="feature-card accent-teal">
+        <div class="feature-icon">⚡</div>
+        <h3>Sub-100ms Responses</h3>
+        <p>Redis-backed caching at the edge. 95th percentile response time under 100ms even under 1M daily requests.</p>
+      </div>
+      <div class="feature-card accent-amber">
+        <div class="feature-icon">🗂️</div>
+        <h3>5-Level Hierarchy</h3>
+        <p>Country → State → District → Sub-District → Village. Query any level with parent filters for cascading dropdowns.</p>
+      </div>
+      <div class="feature-card accent-rose">
+        <div class="feature-icon">🔍</div>
+        <h3>Fuzzy Search</h3>
+        <p>Transliteration-aware search handles spelling variations across languages and regional name differences.</p>
+      </div>
+      <div class="feature-card accent-indigo">
+        <div class="feature-icon">🔒</div>
+        <h3>API Key + JWT Auth</h3>
+        <p>Dual-layer security. API key for server-to-server, JWT tokens for browser clients. Rate limits per tier.</p>
+      </div>
+      <div class="feature-card accent-green">
+        <div class="feature-icon">📊</div>
+        <h3>Usage Analytics</h3>
+        <p>Real-time dashboard showing API calls, error rates, latency histograms, and per-endpoint breakdown.</p>
+      </div>
+      <div class="feature-card accent-purple">
+        <div class="feature-icon">🌐</div>
+        <h3>Vercel Edge Network</h3>
+        <p>Deployed on Vercel's global edge network. NeonDB PostgreSQL for durable storage with connection pooling.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE FLOW -->
+<section class="arch-section">
+  <div class="container">
+    <div class="section-label">Architecture</div>
+    <h2>How the Data Flows</h2>
+    <div class="arch-flow">
+      <div class="arch-step">
+        <div class="arch-icon">🏢</div>
+        <div class="arch-name">B2B Client App</div>
+        <div class="arch-desc">Sends API key + query</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-step">
+        <div class="arch-icon">🛡️</div>
+        <div class="arch-name">Auth Gateway</div>
+        <div class="arch-desc">Validates key, checks rate limit</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-step">
+        <div class="arch-icon">⚡</div>
+        <div class="arch-name">Redis Cache</div>
+        <div class="arch-desc">Cache hit → instant response</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-step">
+        <div class="arch-icon">🗄️</div>
+        <div class="arch-name">NeonDB PostgreSQL</div>
+        <div class="arch-desc">Cache miss → DB query</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-step">
+        <div class="arch-icon">📦</div>
+        <div class="arch-name">JSON Response</div>
+        <div class="arch-desc">Normalized address data</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="container">
+    <div class="section-label">Pricing</div>
+    <h2>Simple, Transparent Pricing</h2>
+    <p class="section-sub">Start free, scale as you grow. No hidden fees.</p>
+    <div class="pricing-toggle">
+      <span class="toggle-label active" id="toggleMonthly">Monthly</span>
+      <label class="switch">
+        <input type="checkbox" id="billingToggle">
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-label" id="toggleAnnual">Annual <span class="save-badge">Save 20%</span></span>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-tier">Free</div>
+        <div class="price-amount"><span class="currency">₹</span><span class="amount" data-monthly="0" data-annual="0">0</span><span class="period">/mo</span></div>
+        <div class="price-desc">For developers & prototypes</div>
+        <ul class="price-features">
+          <li>✓ 1,000 requests/day</li>
+          <li>✓ All states & districts</li>
+          <li>✓ Basic search API</li>
+          <li>✓ Community support</li>
+          <li class="disabled">✗ Sub-district data</li>
+          <li class="disabled">✗ Village-level data</li>
+        </ul>
+        <a href="portal.html" class="btn-ghost full">Get Started</a>
+      </div>
+      <div class="price-card featured">
+        <div class="popular-badge">Most Popular</div>
+        <div class="price-tier">Premium</div>
+        <div class="price-amount"><span class="currency">₹</span><span class="amount" data-monthly="2999" data-annual="2399">2,999</span><span class="period">/mo</span></div>
+        <div class="price-desc">For growing startups</div>
+        <ul class="price-features">
+          <li>✓ 50,000 requests/day</li>
+          <li>✓ Full hierarchy access</li>
+          <li>✓ Fuzzy search + autocomplete</li>
+          <li>✓ Village-level data</li>
+          <li>✓ Email support</li>
+          <li class="disabled">✗ Dedicated SLA</li>
+        </ul>
+        <a href="portal.html" class="btn-primary full">Start Free Trial</a>
+      </div>
+      <div class="price-card">
+        <div class="price-tier">Pro</div>
+        <div class="price-amount"><span class="currency">₹</span><span class="amount" data-monthly="9999" data-annual="7999">9,999</span><span class="period">/mo</span></div>
+        <div class="price-desc">For established businesses</div>
+        <ul class="price-features">
+          <li>✓ 500,000 requests/day</li>
+          <li>✓ Everything in Premium</li>
+          <li>✓ Bulk data export</li>
+          <li>✓ 99.9% SLA</li>
+          <li>✓ Priority support</li>
+          <li>✓ Custom webhooks</li>
+        </ul>
+        <a href="portal.html" class="btn-ghost full">Get Started</a>
+      </div>
+      <div class="price-card">
+        <div class="price-tier">Unlimited</div>
+        <div class="price-amount"><span class="small-amount">Custom</span></div>
+        <div class="price-desc">For enterprises & platforms</div>
+        <ul class="price-features">
+          <li>✓ Unlimited requests</li>
+          <li>✓ White-label option</li>
+          <li>✓ On-premise deployment</li>
+          <li>✓ Dedicated infrastructure</li>
+          <li>✓ 99.99% SLA</li>
+          <li>✓ 24/7 dedicated support</li>
+        </ul>
+        <a href="#contact" class="btn-ghost full">Contact Sales</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DATA COVERAGE MAP -->
+<section class="coverage-section">
+  <div class="container">
+    <div class="section-label">Coverage</div>
+    <h2>Complete National Coverage</h2>
+    <div class="coverage-grid">
+      <div class="coverage-table-wrap">
+        <table class="coverage-table">
+          <thead><tr><th>State</th><th>Districts</th><th>Sub-Districts</th><th>Villages</th><th>Coverage</th></tr></thead>
+          <tbody id="coverageTableBody"></tbody>
+        </table>
+      </div>
+      <div class="coverage-chart-wrap">
+        <canvas id="coverageChart" width="360" height="360"></canvas>
+        <div class="chart-legend" id="chartLegend"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <h2>Ready to Build?</h2>
+    <p>Join 200+ B2B clients using GeoIndia API in production. Start with 1,000 free requests/day.</p>
+    <div class="cta-actions">
+      <a href="portal.html" class="btn-primary large">Create Free Account</a>
+      <a href="docs.html" class="btn-ghost large">Read Documentation</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="logo">Geo<span>India</span></div>
+        <p class="footer-tagline">India's most complete village-level address API. Built for developers, designed for scale.</p>
+      </div>
+      <div>
+        <div class="footer-heading">Product</div>
+        <ul><li><a href="docs.html">API Docs</a></li><li><a href="#pricing">Pricing</a></li><li><a href="portal.html">Dashboard</a></li></ul>
+      </div>
+      <div>
+        <div class="footer-heading">Company</div>
+        <ul><li><a href="#">About</a></li><li><a href="#">Blog</a></li><li><a href="#">Contact</a></li></ul>
+      </div>
+      <div>
+        <div class="footer-heading">Legal</div>
+        <ul><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Service</a></li><li><a href="#">SLA</a></li></ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 GeoIndia API. All rights reserved.</span>
+      <span>Data sourced from Census of India</span>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>
