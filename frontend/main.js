@@ -55,21 +55,6 @@ function typeEffect() {
 typeEffect();
 
 // ================================
-// JSON DATA LOAD
-// ================================
-let fullData = [];
-
-fetch("final_india_dataset_clean.json")
-  .then(res => res.json())
-  .then(data => {
-    fullData = data;
-    loadStates();
-  })
-  .catch(err => {
-    console.error("Error loading JSON:", err);
-  });
-
-// ================================
 // ELEMENTS
 // ================================
 const stateSelect = document.getElementById("demoState");
@@ -81,18 +66,19 @@ const searchBtn = document.getElementById("demoSearch");
 const urlDiv = document.getElementById("demoUrl");
 
 // ================================
-// LOAD STATES
+// LOAD STATES FROM BACKEND
 // ================================
-function loadStates() {
-  const states = [...new Set(fullData.map(d => d.State))];
-
-  states.forEach(state => {
-    const option = document.createElement("option");
-    option.value = state;
-    option.textContent = state;
-    stateSelect.appendChild(option);
-  });
-}
+fetch("http://localhost:3000/states")
+  .then(res => res.json())
+  .then(states => {
+    states.forEach(state => {
+      const option = document.createElement("option");
+      option.value = state;
+      option.textContent = state;
+      stateSelect.appendChild(option);
+    });
+  })
+  .catch(err => console.error("Error loading states:", err));
 
 // ================================
 // STATE → DISTRICT
@@ -101,15 +87,17 @@ stateSelect.addEventListener("change", () => {
   districtSelect.innerHTML = `<option>Select District</option>`;
   subDistrictSelect.innerHTML = `<option>Select Sub-District</option>`;
 
-  const filtered = fullData.filter(d => d.State === stateSelect.value);
-  const districts = [...new Set(filtered.map(d => d.District))];
-
-  districts.forEach(d => {
-    const option = document.createElement("option");
-    option.value = d;
-    option.textContent = d;
-    districtSelect.appendChild(option);
-  });
+  fetch(`http://localhost:3000/districts?state=${stateSelect.value}`)
+    .then(res => res.json())
+    .then(districts => {
+      districts.forEach(d => {
+        const option = document.createElement("option");
+        option.value = d;
+        option.textContent = d;
+        districtSelect.appendChild(option);
+      });
+    })
+    .catch(err => console.error("Error loading districts:", err));
 });
 
 // ================================
@@ -118,23 +106,21 @@ stateSelect.addEventListener("change", () => {
 districtSelect.addEventListener("change", () => {
   subDistrictSelect.innerHTML = `<option>Select Sub-District</option>`;
 
-  const filtered = fullData.filter(
-    d => d.State === stateSelect.value &&
-         d.District === districtSelect.value
-  );
-
-  const subs = [...new Set(filtered.map(d => d.SubDistrict))];
-
-  subs.forEach(s => {
-    const option = document.createElement("option");
-    option.value = s;
-    option.textContent = s;
-    subDistrictSelect.appendChild(option);
-  });
+  fetch(`http://localhost:3000/subdistricts?state=${stateSelect.value}&district=${districtSelect.value}`)
+    .then(res => res.json())
+    .then(subs => {
+      subs.forEach(s => {
+        const option = document.createElement("option");
+        option.value = s;
+        option.textContent = s;
+        subDistrictSelect.appendChild(option);
+      });
+    })
+    .catch(err => console.error("Error loading subdistricts:", err));
 });
 
 // ================================
-// SEARCH FUNCTION
+// SEARCH VILLAGES
 // ================================
 searchBtn.addEventListener("click", () => {
   const state = stateSelect.value;
@@ -142,7 +128,7 @@ searchBtn.addEventListener("click", () => {
   const subDistrict = subDistrictSelect.value;
   const villageQuery = villageInput.value.toLowerCase();
 
-  resultsDiv.innerHTML = "";
+  resultsDiv.innerHTML = "Loading...";
   urlDiv.style.display = "block";
 
   if (!state || !district || !subDistrict) {
@@ -150,27 +136,33 @@ searchBtn.addEventListener("click", () => {
     return;
   }
 
-  const filtered = fullData.filter(d =>
-    d.State === state &&
-    d.District === district &&
-    d.SubDistrict === subDistrict &&
-    d.Village.toLowerCase().includes(villageQuery)
-  );
+  fetch(`http://localhost:3000/villages?state=${state}&district=${district}&subDistrict=${subDistrict}`)
+    .then(res => res.json())
+    .then(villages => {
+      resultsDiv.innerHTML = "";
 
-  if (filtered.length === 0) {
-    resultsDiv.innerHTML = `<p>No results found</p>`;
-    return;
-  }
+      const filtered = villages.filter(v =>
+        v.Village.toLowerCase().includes(villageQuery)
+      );
 
-  filtered.forEach(v => {
-    const chip = document.createElement("div");
-    chip.className = "result-chip";
-    chip.innerHTML = `
-      <strong>${v.Village}</strong>
-      <span>${v.SubDistrict}, ${v.District}, ${v.State}, India</span>
-    `;
-    resultsDiv.appendChild(chip);
-  });
+      if (filtered.length === 0) {
+        resultsDiv.innerHTML = `<p>No results found</p>`;
+        return;
+      }
+
+      resultsDiv.innerHTML = `<p><strong>Showing ${filtered.length} results</strong></p>`;
+
+      filtered.forEach(v => {
+        const chip = document.createElement("div");
+        chip.className = "result-chip";
+        chip.innerHTML = `
+          <strong>${v.Village}</strong>
+          <span>${v.SubDistrict}, ${v.District}, ${v.State}, India</span>
+        `;
+        resultsDiv.appendChild(chip);
+      });
+    })
+    .catch(err => console.error("Error fetching villages:", err));
 
   // API URL preview
   urlDiv.innerText = `GET /api/v1/villages?state=${state}&district=${district}&subDistrict=${subDistrict}&search=${villageQuery}`;
@@ -196,8 +188,9 @@ toggle.addEventListener("change", () => {
   annualLabel.classList.toggle("active");
 });
 
-
+// ================================
 // COVERAGE TABLE (STATIC)
+// ================================
 const tableBody = document.getElementById("coverageTableBody");
 
 const coverageData = [
@@ -223,3 +216,64 @@ coverageData.forEach(row => {
 
   tableBody.appendChild(tr);
 });
+
+// ================================
+// ADMIN PANEL DATA
+// ================================
+
+function loadAdminStats() {
+  fetch("http://localhost:3000/states")
+    .then(res => res.json())
+    .then(states => {
+      document.getElementById("totalStates").innerText = states.length;
+    });
+
+  fetch("http://localhost:3000/districts?state=All")
+    .then(() => {
+      // fallback method since API is state-based
+      fetch("http://localhost:3000/states")
+        .then(res => res.json())
+        .then(states => {
+          let allDistricts = new Set();
+          let allSubs = new Set();
+          let totalVillages = 0;
+
+          let promises = states.map(state =>
+            fetch(`http://localhost:3000/districts?state=${state}`)
+              .then(res => res.json())
+              .then(districts => {
+                districts.forEach(d => allDistricts.add(d));
+
+                return Promise.all(
+                  districts.map(d =>
+                    fetch(`http://localhost:3000/subdistricts?state=${state}&district=${d}`)
+                      .then(res => res.json())
+                      .then(subs => {
+                        subs.forEach(s => allSubs.add(s));
+
+                        return Promise.all(
+                          subs.map(s =>
+                            fetch(`http://localhost:3000/villages?state=${state}&district=${d}&subDistrict=${s}`)
+                              .then(res => res.json())
+                              .then(villages => {
+                                totalVillages += villages.length;
+                              })
+                          )
+                        );
+                      })
+                  )
+                );
+              })
+          );
+
+          Promise.all(promises).then(() => {
+            document.getElementById("totalDistricts").innerText = allDistricts.size;
+            document.getElementById("totalSubs").innerText = allSubs.size;
+            document.getElementById("totalVillages").innerText = totalVillages;
+          });
+        });
+    });
+}
+
+// Load admin stats
+loadAdminStats();

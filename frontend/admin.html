@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoIndia API — Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <a href="index.html" class="logo">Geo<span>India</span></a>
+    <div class="admin-chip">Admin Panel</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">Overview</div>
+    <a class="nav-item active" data-page="dashboard">
+      <span class="nav-icon">▦</span> Dashboard
+    </a>
+    <a class="nav-item" data-page="analytics">
+      <span class="nav-icon">◈</span> Analytics
+    </a>
+
+    <div class="nav-section">Management</div>
+    <a class="nav-item" data-page="clients">
+      <span class="nav-icon">◉</span> B2B Clients
+    </a>
+    <a class="nav-item" data-page="apikeys">
+      <span class="nav-icon">⬡</span> API Keys
+    </a>
+    <a class="nav-item" data-page="data">
+      <span class="nav-icon">⊞</span> Data Manager
+    </a>
+
+    <div class="nav-section">System</div>
+    <a class="nav-item" data-page="logs">
+      <span class="nav-icon">≡</span> Request Logs
+    </a>
+    <a class="nav-item" data-page="settings">
+      <span class="nav-icon">⚙</span> Settings
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="system-status">
+      <div class="status-dot pulse"></div>
+      <span>All systems operational</span>
+    </div>
+  </div>
+</aside>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ═══════════════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════════════ -->
+<div class="main-content">
+
+  <!-- TOP HEADER -->
+  <header class="page-header">
+    <div class="header-left">
+      <button class="hamburger-btn" id="hamburgerBtn">
+        <span></span><span></span><span></span>
+      </button>
+      <div>
+        <div class="page-title" id="pageTitle">Dashboard</div>
+        <div class="page-subtitle" id="pageSubtitle">Welcome back, Admin — here's what's happening</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-search">
+        <span class="search-icon">⌕</span>
+        <input type="text" placeholder="Search clients, keys..." id="globalSearch" />
+      </div>
+      <button class="icon-btn" title="Notifications" id="notifBtn">
+        🔔
+        <span class="notif-badge">4</span>
+      </button>
+      <div class="avatar-wrap">
+        <div class="avatar">A</div>
+        <div class="avatar-info">
+          <div class="avatar-name">Admin</div>
+          <div class="avatar-role">Super Admin</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── PAGE: DASHBOARD ─── -->
+  <div class="page-body" id="page-dashboard">
+
+    <!-- TIME FILTER -->
+    <div class="time-filter-bar">
+      <button class="time-btn active" data-range="7d">7 Days</button>
+      <button class="time-btn" data-range="30d">30 Days</button>
+      <button class="time-btn" data-range="90d">90 Days</button>
+      <button class="time-btn" data-range="1y">1 Year</button>
+      <div class="refresh-info">Last updated: <span id="lastUpdated">just now</span></div>
+    </div>
+
+    <!-- METRICS ROW -->
+    <div class="metrics-grid" id="metricsGrid">
+      <!-- injected by JS -->
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">API Request Volume</div>
+            <div class="chart-card-sub">Total requests per day across all clients</div>
+          </div>
+          <div class="chart-filter">
+            <button class="chart-filter-btn active" data-metric="requests">Requests</button>
+            <button class="chart-filter-btn" data-metric="errors">Errors</button>
+            <button class="chart-filter-btn" data-metric="latency">Latency</button>
+          </div>
+        </div>
+        <canvas id="requestVolumeChart" height="200"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Plan Distribution</div>
+            <div class="chart-card-sub">Active subscriptions by tier</div>
+          </div>
+        </div>
+        <canvas id="planDonutChart" height="180"></canvas>
+        <div class="donut-legend" id="donutLegend"></div>
+      </div>
+    </div>
+
+    <!-- SECOND CHARTS ROW -->
+    <div class="charts-row-3">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Endpoint Usage</div>
+            <div class="chart-card-sub">Most hit API routes</div>
+          </div>
+        </div>
+        <div class="endpoint-bars" id="endpointBars"></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Response Times</div>
+            <div class="chart-card-sub">p50 / p95 / p99 latency (ms)</div>
+          </div>
+        </div>
+        <canvas id="latencyChart" height="180"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Revenue MTD</div>
+            <div class="chart-card-sub">Month-to-date breakdown</div>
+          </div>
+        </div>
+        <div class="revenue-breakdown" id="revenueBreakdown"></div>
+      </div>
+    </div>
+
+    <!-- RECENT CLIENTS TABLE -->
+    <div class="data-table-card">
+      <div class="data-table-header">
+        <div>
+          <div class="chart-card-title">Recent Client Registrations</div>
+          <div class="chart-card-sub">Last 10 new accounts</div>
+        </div>
+        <button class="btn-sm-primary" onclick="showPage('clients')">View All →</button>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Plan</th>
+              <th>API Calls Today</th>
+              <th>Status</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="recentClientsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PAGE: ANALYTICS ─── -->
+  <div class="page-body hidden" id="page-analytics">
+    <div class="analytics-kpi-row" id="analyticsKPI"></div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Geographic Query Distribution</div>
+            <div class="chart-card-sub">Which states are queried most</div>
+          </div>
+        </div>
+        <div class="geo-bars" id="geoBars"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Cache Performance</div>
+            <div class="chart-card-sub">Redis hit vs miss ratio</div>
+          </div>
+        </div>
+        <canvas id="cacheChart" height="200"></canvas>
+        <div class="cache-stats" id="cacheStats"></div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Error Rate by Endpoint</div>
+            <div class="chart-card-sub">HTTP 4xx and 5xx breakdown</div>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th>Endpoint</th><th>Total Calls</th><th>4xx Errors</th><th>5xx Errors</th><th>Error Rate</th><th>Trend</th></tr></thead>
+            <tbody id="errorTable"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Hourly Traffic Heatmap</div>
+            <div class="chart-card-sub">Request density by hour × day</div>
+          </div>
+        </div>
+        <div class="heatmap-wrap" id="heatmap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PAGE: CLIENTS ─── -->
+  <div class="page-body hidden" id="page-clients">
+    <div class="page-actions-bar">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" placeholder="Search by name, email, company..." id="clientSearch" class="table-search" />
+      </div>
+      <div class="filter-group">
+        <select class="select-sm" id="planFilter">
+          <option value="">All Plans</option>
+          <option>Free</option><option>Premium</option><option>Pro</option><option>Unlimited</option>
+        </select>
+        <select class="select-sm" id="statusFilter">
+          <option value="">All Status</option>
+          <option>Active</option><option>Suspended</option><option>Pending</option>
+        </select>
+      </div>
+      <button class="btn-sm-primary" id="exportClientsBtn">↓ Export CSV</button>
+    </div>
+
+    <div class="data-table-card">
+      <div class="data-table-header">
+        <div>
+          <div class="chart-card-title">All B2B Clients</div>
+          <div class="chart-card-sub" id="clientCount">Loading...</div>
+        </div>
+        <button class="btn-sm-secondary" id="addClientBtn">+ Add Client</button>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="selectAll" class="checkbox" /></th>
+              <th>Client</th>
+              <th>Plan</th>
+              <th>API Calls</th>
+              <th>Limit</th>
+              <th>Status</th>
+              <th>MRR</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="clientsTable"></tbody>
+        </table>
+      </div>
+      <div class="table-pagination" id="clientPagination"></div>
+    </div>
+  </div>
+
+  <!-- ─── PAGE: API KEYS ─── -->
+  <div class="page-body hidden" id="page-apikeys">
+    <div class="page-actions-bar">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" placeholder="Search API keys..." class="table-search" id="keySearch" />
+      </div>
+      <button class="btn-sm-primary" id="genKeyBtn">+ Generate Key</button>
+    </div>
+
+    <div class="metrics-grid" id="keyMetrics"></div>
+
+    <div class="data-table-card">
+      <div class="data-table-header">
+        <div>
+          <div class="chart-card-title">All API Keys</div>
+          <div class="chart-card-sub">Manage client access credentials</div>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Key ID</th>
+              <th>Client</th>
+              <th>Key Preview</th>
+              <th>Plan</th>
+              <th>Calls Today</th>
+              <th>Daily Limit</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="apiKeysTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PAGE: DATA MANAGER ─── -->
+  <div class="page-body hidden" id="page-data">
+    <div class="data-coverage-overview" id="dataCoverageOverview"></div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">State Coverage</div>
+            <div class="chart-card-sub">Records indexed per state</div>
+          </div>
+          <button class="btn-sm-secondary" id="refreshDataBtn">↻ Refresh</button>
+        </div>
+        <div class="table-scroll" style="max-height:420px;">
+          <table class="data-table">
+            <thead><tr><th>State</th><th>Districts</th><th>Sub-Districts</th><th>Villages</th><th>Last Sync</th><th>Status</th></tr></thead>
+            <tbody id="dataCoverageTable"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Data Import</div>
+            <div class="chart-card-sub">Upload new census data</div>
+          </div>
+        </div>
+        <div class="import-zone" id="importZone">
+          <div class="import-icon">⬆</div>
+          <div class="import-title">Drop CSV / JSON file here</div>
+          <div class="import-sub">Supports Census of India format · Max 50MB</div>
+          <button class="btn-sm-primary" style="margin-top:16px;">Browse File</button>
+        </div>
+        <div class="import-log" id="importLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PAGE: REQUEST LOGS ─── -->
+  <div class="page-body hidden" id="page-logs">
+    <div class="page-actions-bar">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" placeholder="Filter by IP, key, endpoint..." class="table-search" id="logSearch" />
+      </div>
+      <select class="select-sm" id="logStatusFilter">
+        <option value="">All Status Codes</option>
+        <option>200</option><option>400</option><option>401</option><option>404</option><option>429</option><option>500</option>
+      </select>
+      <button class="btn-sm-secondary" id="liveToggle">⬤ Live</button>
+    </div>
+
+    <div class="data-table-card">
+      <div class="data-table-header">
+        <div>
+          <div class="chart-card-title">Request Logs</div>
+          <div class="chart-card-sub">Real-time API access log</div>
+        </div>
+        <div class="log-status-row" id="logStatusRow"></div>
+      </div>
+      <div class="table-scroll" style="max-height:560px;">
+        <table class="data-table log-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Client</th>
+              <th>Endpoint</th>
+              <th>Method</th>
+              <th>Status</th>
+              <th>Latency</th>
+              <th>IP</th>
+              <th>Cache</th>
+            </tr>
+          </thead>
+          <tbody id="logsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PAGE: SETTINGS ─── -->
+  <div class="page-body hidden" id="page-settings">
+    <div class="settings-layout">
+      <div class="settings-nav">
+        <button class="settings-nav-item active" data-tab="general">General</button>
+        <button class="settings-nav-item" data-tab="rate-limits">Rate Limits</button>
+        <button class="settings-nav-item" data-tab="security">Security</button>
+        <button class="settings-nav-item" data-tab="notifications">Notifications</button>
+        <button class="settings-nav-item" data-tab="billing">Billing</button>
+      </div>
+      <div class="settings-content" id="settingsContent">
+        <!-- injected by JS -->
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     MODAL: Client Detail / Add Client
+════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="clientModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Client Details</div>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <!-- injected by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="admin.js"></script>
+</body>
+</html>
